@@ -1,0 +1,69 @@
+package AutomateOCUI;
+
+import org.openqa.selenium.By;
+import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebElement;
+import org.openqa.selenium.chrome.ChromeDriver;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
+
+public class CoronaCasesPerStateCounter {
+    public static void main(String[] args) throws IOException {
+        BufferedReader br =new BufferedReader(new InputStreamReader(System.in));
+        System.setProperty("webdriver.chrome.driver","C:\\Users\\ap28241\\Downloads\\chromedriver.exe");
+        WebDriver driver= new ChromeDriver();
+        driver.get("https://www.mygov.in/covid-19/#section1");
+        driver.findElement(By.id("statewise-data")).click();
+        List states=driver.findElements(By.xpath("//*[@id=\"ind_mp_tbl\"]/tbody/tr"));
+        List<String> imp=new ArrayList();
+
+        String old="//*[@id=\"ind_mp_tbl\"]/tbody/tr";
+
+        for(int i=1;i<states.size();i++){
+           WebElement err= driver.findElement(By.xpath(old+"["+i+"]/td[1]"));
+         //  System.out.println(err.getText());
+               imp.add(err.getText().toLowerCase());
+        }
+        String choice = "";
+       // System.out.println(states.size());
+
+
+        again:while (!choice.equals("quit")){
+        String st="";
+           do {
+               System.out.println("Enter name of state for which you need covid info\nEnter quit if you want to quit ");
+               st = br.readLine();
+               if (st.equals("quit")) System.exit(0);
+           }while (!imp.contains(st));
+           st = st.toLowerCase();
+        int fetch_detail= imp.indexOf(st)+1;
+        if(fetch_detail==0) {System.out.println("Couldn't find the state pls check spelling");System.exit(0);}
+
+         List<WebElement> headings = driver.findElements(By.xpath("//*[@id=\"ind_mp_tbl\"]/thead/tr/th"));
+         old="//*[@id=\"ind_mp_tbl\"]/thead/tr/th";
+        System.out.println();
+        System.out.println("\t\t\t\t\t\t\t\tFor state "+st.toUpperCase()+" the condition of COVID-19 is ");
+         for(int i=2;i<=headings.size();i++){
+             WebElement err=driver.findElement(By.xpath(old+"["+i+"]"));
+             System.out.printf("%20s",err.getText());
+         }
+
+
+        System.out.println();
+         treat(fetch_detail,driver);
+            System.out.println();
+    }}
+    static void treat(int f,WebDriver driver){
+        for(int i=2;i<=8;i++) {
+            String op = driver.findElement(By.xpath("//*[@id=\"ind_mp_tbl\"]/tbody/tr[" + f + "]/td[" + i + "]/p")).getText();
+            if (driver.findElement(By.xpath("//*[@id=\"ind_mp_tbl\"]/tbody/tr[" + f + "]/td[" + i + "]/p")).getText().contains("\n")) {
+                op = op.substring(0, op.indexOf("\n"));
+            }
+            System.out.printf("%20s",op);
+        }
+    }
+}
